@@ -1,0 +1,47 @@
+libb64 (1.2-5-deepin1) unstable; urgency=medium
+
+  * Rebuild
+
+ -- Deepin Packages Builder <packages@deepin.org>  Thu, 24 Nov 2022 07:20:55 +0800
+
+libb64 (1.2-5) unstable; urgency=medium
+
+  * debian/control: bump standard to 4.1.3 (no changes)
+  * debian/control: add salsa VCS URLs
+  * debian/control: use dh11
+  * Fix FTCBFS: (Closes: #894137)
+    + Let dh_auto_build pass cross tools to make.
+    + Let buildtools.mk supply $(CC).
+    (thanks to Helmut Grohne for the patch)
+
+ -- Thorsten Alteholz <debian@alteholz.de>  Sun, 01 Apr 2018 18:16:02 +0100
+
+libb64 (1.2-4) unstable; urgency=medium
+
+  * new maintainer (Closes: #706894)
+  * debian/control: bump standard to 4.1.0 (no changes)
+  * debian/control: use dh10
+  * debian/rules: add bindnow linker flag
+  * add off-by-one.diff (Closes: #801584) (LP: #1501176)
+
+ -- Thorsten Alteholz <debian@alteholz.de>  Thu, 07 Sep 2017 18:16:02 +0200
+
+libb64 (1.2-3) unstable; urgency=low
+
+  * Upload to unstable.
+  * Don't use dh_testdir; instead, use makefile rules to ensure that
+    debian/rules can be only run in the correct directory.
+
+ -- Jakub Wilk <jwilk@debian.org>  Sun, 05 May 2013 22:16:02 +0200
+
+libb64 (1.2-2) experimental; urgency=low
+
+  * Initialize encoder/decoder state in the constructors.
+
+ -- Jakub Wilk <jwilk@debian.org>  Fri, 11 Jan 2013 15:08:40 +0100
+
+libb64 (1.2-1) experimental; urgency=low
+
+  * Initial release (closes: #694724).
+
+ -- Jakub Wilk <jwilk@debian.org>  Fri, 07 Dec 2012 12:59:19 +0100

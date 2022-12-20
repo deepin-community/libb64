@@ -1,0 +1,2 @@
+version=3
+http://sf.net/libb64/libb64-([0-9.]+)[.]src[.](?:zip|tar[.]gz)$

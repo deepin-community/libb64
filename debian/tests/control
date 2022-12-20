@@ -1,0 +1,2 @@
+Tests: libb64-dev
+Depends: g++, libb64-dev

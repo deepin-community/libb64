@@ -1,0 +1,8 @@
+libb64.so.0d libb64-0d #MINVER#
+ base64_decode_block@Base 1.2
+ base64_decode_value@Base 1.2
+ base64_encode_block@Base 1.2
+ base64_encode_blockend@Base 1.2
+ base64_encode_value@Base 1.2
+ base64_init_decodestate@Base 1.2
+ base64_init_encodestate@Base 1.2

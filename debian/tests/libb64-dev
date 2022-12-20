@@ -1,0 +1,71 @@
+#!/bin/sh
+
+log_begin()
+{
+    printf ' %s ... ' "$*"
+}
+
+log_end()
+{
+    if [ -n "$*" ]
+    then
+        printf 'ok\n'
+        return 0
+    else
+        printf 'FAIL\n'
+        return 1
+    fi
+}
+
+set -e -u
+export LC_ALL=C
+rc=0
+build_time=
+make_flags=-s
+if [ "$*" = '--build-time' ]
+then
+    build_time=build-time
+    ADTTMP=debian/tmp/adt/
+    mkdir -p $ADTTMP
+    rm -rf $ADTTMP/*
+fi
+cp -a base64/ "$ADTTMP/cmdline"
+cd "$ADTTMP"
+if [ -z "$build_time" ]
+then
+    make $make_flags -C cmdline
+    # Check if it's dynamically linked:
+    log_begin 'dynamic linking to libb64'
+    ok=yes
+    ldd cmdline/base64 | grep -w libb64.so >/dev/null || ok=
+    log_end $ok || rc=1
+fi
+ln -sf /bin/sh big.orig
+printf 'x' > tiny.orig
+for tc in *.orig
+do
+    base=${tc%.orig}
+    # ---------
+    log_begin "$base: decoder"
+    ok=yes
+    base64 $base.orig > $base.coreutils
+    cmdline/base64 -d $base.coreutils $base.coreutils.libb64 || ok=
+    cmp $base.orig $base.coreutils.libb64 || ok=
+    log_end $ok || rc=1
+    # ---------
+    log_begin "$base: encoder"
+    ok=yes
+    cmdline/base64 -e $base.orig $base.libb64 || ok=
+    base64 -d $base.libb64 > $base.libb64.coreutils || ok=
+    cmp $base.orig $base.libb64.coreutils || ok=
+    log_end $ok || rc=1
+    # ---------
+    log_begin "$base: round-trip"
+    ok=yes
+    cmdline/base64 -d $base.libb64 $base.libb64.libb64 || ok=
+    cmp $base.orig $base.libb64.libb64 || ok=
+    log_end $ok || rc=1
+done
+exit $rc
+
+# vim:ts=4 sw=4 et

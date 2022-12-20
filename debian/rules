@@ -1,0 +1,69 @@
+#!/usr/bin/make -f
+
+-include /usr/share/dpkg/buildtools.mk
+
+static_lib = libb64.a
+shared_lib = libb64.so
+soversion = 0d
+soname = $(shared_lib).$(soversion)
+
+libdir = /usr/lib/$(shell dpkg-architecture -qDEB_HOST_MULTIARCH)/
+
+cflags = \
+	 $(shell dpkg-buildflags --get CFLAGS) \
+	 $(shell dpkg-buildflags --get CPPFLAGS)
+ldflags = $(shell dpkg-buildflags --get LDFLAGS) -Wl,-z,now
+
+.PHONY: build build-indep build-arch
+build build-arch: build-stamp
+
+build-stamp: debian/control Makefile
+	dh_testdir
+	rm -rf src-shlib/
+	cp -a src src-shlib/
+	cd src-shlib/ && rm -f *.o *.a
+	CFLAGS="$(cflags)" LDFLAGS="$(ldflags)" dh_auto_build
+	CFLAGS="$(cflags) -fPIC" dh_auto_build --sourcedirectory=src-shlib/
+	cd src-shlib && $(CC) $(ldflags) -shared -Wl,-soname,$(soname) *.o -o $(soname)
+	cd src-shlib && ln -sf $(soname) $(shared_lib)
+ifeq "$(filter nocheck,$(DEB_BUILD_OPTIONS))" ""
+	debian/tests/libb64-dev --build-time
+endif
+	touch $(@)
+
+.PHONY: binary binary-indep binary-arch
+binary binary-arch: debian/control build-stamp
+	dh_testdir
+	dh_testroot
+	dh_prep
+	dh_install -p libb64-dev src/$(static_lib) $(libdir)
+	dh_install -p libb64-dev src-shlib/$(shared_lib) $(libdir)
+	dh_install -p libb64-dev include/* /usr/include/
+	dh_install -p libb64-$(soversion) src-shlib/$(soname) $(libdir)
+	dh_installdocs AUTHORS BENCHMARKS README
+	dh_installchangelogs CHANGELOG
+	dh_compress
+	dh_fixperms
+	dh_strip
+	dh_makeshlibs -- -c4
+	dh_shlibdeps
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+.PHONY: clean
+clean: debian/control Makefile
+	$(MAKE) clean
+	rm -rf src-shlib/
+	dh_clean */depend
+
+here = $(dir $(firstword $(MAKEFILE_LIST)))/..
+debian_version = $(word 2,$(shell cd $(here) && dpkg-parsechangelog | grep ^Version:))
+upstream_version = $(firstword $(subst -, ,$(debian_version)))
+
+.PHONY: get-orig-source
+get-orig-source:
+	sh $(here)/debian/get-orig-source.sh $(upstream_version)
+
+# vim:ts=4 sw=4 noet
